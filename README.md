@@ -4,7 +4,7 @@
 - make majority class dropout type clear
 - add FP16 to majority class and IWSLT instructions
 - updated page 1 figure and majority class figure
-- update results for all IWSLT experiments, and for annotated lambada with including all rationales
+- update results for all IWSLT experiments, and for annotated LAMBADA with including all rationales
 
 ## Requirements and Installation
 Configure a virtual environment using Python 3.6+ ([instructions here](https://docs.python.org/3.6/tutorial/venv.html)).
