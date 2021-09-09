@@ -1,12 +1,5 @@
 # Rationales for Sequential Predictions
 
-## Changes to final draft
-- make majority class dropout type clear
-- add FP16 to majority class and IWSLT instructions
-- updated page 1 figure and majority class figure
-- update results for all IWSLT experiments, and for annotated LAMBADA with including all rationales
-- wall clock time of running experiments
-
 ## Requirements and Installation
 Configure a virtual environment using Python 3.6+ ([instructions here](https://docs.python.org/3.6/tutorial/venv.html)).
 Inside the virtual environment, use `pip` to install the required packages:
@@ -526,11 +519,6 @@ cd ../huggingface
 ```{bash}
 python compare_rationalization_times.py  --checkpoint_dir $CHECKPOINT_DIR
 ```
-This depends on the model size and GPU, but something like this for medium
-
-Average greedy time: 0.17
-Average inefficient greedy time: 0.57
-Average exhaustive time: 61.74
 
 ### Greedily rationalize Lambada
 ```{bash}
