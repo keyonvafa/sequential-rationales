@@ -3,6 +3,11 @@
 ## Quick start
 Use our [colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw) to generate a sequence with GPT-2 and perform greedy rationalization.
 
+<p align="center">
+<img src="https://github.com/keyonvafa/sequential-rationales/blob/main/analysis/figs/sequential_rationalization.gif" width="300" height="300" />
+</p>
+
+
 ## Requirements and Installation
 Configure a virtual environment using Python 3.6+ ([instructions here](https://docs.python.org/3.6/tutorial/venv.html)).
 Inside the virtual environment, use `pip` to install the required packages:
