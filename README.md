@@ -28,7 +28,7 @@ generated_input = model.generate(input_ids=input_ids, max_length=16, do_sample=F
 rationales, rationalization_log = rationalize_lm(model, generated_input, tokenizer, verbose=True)
 ```
 
-## Annotated Lambada
+## <a id="annotated_lambada">Annotated Lambada</a>
 `annotated_lambada.json` is an annotated dataset based on [Lambada](https://arxiv.org/abs/1606.06031), containing 107 passages and their annotated rationales.  Each row has three keys: 
 - `lambadaIndex` contains the corresponding (0-indexed) entry in Lambada.
 - `text` contains the text of the full passage.
@@ -157,6 +157,7 @@ rationales,  = rationalize_lm(model, generated_sequence, verbose=True)
 The rest of this README provides instructions for reproducing all of the experiments from our paper. All of the commands below were run on a single GPU.
 
 ### Majority Class
+Majority Class is a synthetic language we simulated. We include the full dataset in [`fairseq/examples/language_model/majority_class`](https://github.com/keyonvafa/sequential-rationales/tree/main/fairseq/examples/language_model/majority_class).
 
 #### <a id="preprocess_majority_class">Preprocess</a>
 ```{bash}
@@ -171,8 +172,9 @@ fairseq-preprocess \
     --workers 20
 ```
 #### Train standard model and evaluate heldout perplexity
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
+CHECKPOINT_DIR=...
 fairseq-train --task language_modeling \
     data-bin/majority_class \
     --arch transformer_lm_majority_class \
@@ -197,8 +199,9 @@ fairseq-eval-lm data-bin/majority_class \
 This should report 1.80 as the test set perplexity.
 
 #### Train compatible model
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
+CHECKPOINT_DIR=...
 fairseq-train --task language_modeling \
     data-bin/majority_class \
     --arch transformer_lm_majority_class \
@@ -224,6 +227,7 @@ fairseq-eval-lm data-bin/majority_class \
 This should also report 1.80 as the test set perplexity.
 
 #### Plot compatibility
+This command will produce Figure 3 from the paper.
 ```{bash}
 cd ../analysis
 python plot_majority_class_compatibility.py --checkpoint_dir $CHECKPOINT_DIR
@@ -231,6 +235,8 @@ cd ../fairseq
 ```
 
 ### <a id="iwslt">IWSLT</a>
+
+IWSLT14 is a machine translation dataset containing translations from German to English.
 
 #### Download and preprocess the data
 ```{bash}
@@ -247,8 +253,9 @@ fairseq-preprocess --source-lang de --target-lang en \
 ```
 
 #### Train standard transformer model
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
+CHECKPOINT_DIR=...
 fairseq-train \
     data-bin/iwslt14.tokenized.de-en \
     --arch transformer --share-decoder-input-output-embed \
@@ -273,15 +280,17 @@ fairseq-train \
 ```
 
 #### Copy standard transformer to new compatible folder
+When we're done pretraining the standard model, we can fine-tune for compatibility using word dropout. We first setup the checkpoint for the compatible model.
 ```bash
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 mkdir $CHECKPOINT_DIR/compatible_iwslt
 cp $CHECKPOINT_DIR/standard_iwslt/checkpoint_best.pt $CHECKPOINT_DIR/compatible_iwslt/checkpoint_last.pt
 ```
 
-#### Train compatible transformer model
+#### Fine-tune compatible transformer model
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
+CHECKPOINT_DIR=...
 fairseq-train \
     data-bin/iwslt14.tokenized.de-en \
     --arch transformer --share-decoder-input-output-embed \
@@ -313,7 +322,7 @@ fairseq-generate data-bin/iwslt14.tokenized.de-en \
     --path $CHECKPOINT_DIR/standard_iwslt/checkpoint_best.pt \
     --batch-size 128 --beam 5 --remove-bpe
 ```
-This should report ~34.76
+This should report 34.76
 
 Compatible:
 ```{bash}
@@ -321,9 +330,10 @@ fairseq-generate data-bin/iwslt14.tokenized.de-en \
     --path $CHECKPOINT_DIR/compatible_iwslt/checkpoint_best.pt \
     --batch-size 128 --beam 5 --remove-bpe
 ```
-This should report ~34.78.
+This should report 34.78.
 
 #### Generate translations for distractor experiment
+The experiment with distractor sentences is described in the first paragraph of Section 8.2 in our paper. The experiment involves generating translations from the test set and concatenating random examples.
 ```{bash}
 mkdir generated_translations
 fairseq-generate data-bin/iwslt14.tokenized.de-en \
@@ -351,7 +361,9 @@ fairseq-preprocess --source-lang de --target-lang en \
 ```
 
 #### Perform greedy rationalization for distractor dataset
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
+CHECKPOINT_DIR=...
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task distractors  --method greedy
 ```
@@ -369,11 +381,10 @@ python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task distractors  --method all_attention
 ```
-And repeat for method in gradient_norm, signed_gradient, integrated_gradient, last_attention, all_attention
 
 #### Evaluate distractors
+Run this set of commands to reproduce Table 3 from the paper.
 ```{bash}
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 cd ../analysis
 python evaluate_distractor_rationales.py --baseline gradient_norm
 python evaluate_distractor_rationales.py --baseline signed_gradient
@@ -382,6 +393,7 @@ python evaluate_distractor_rationales.py --baseline last_attention
 python evaluate_distractor_rationales.py --baseline all_attention
 cd ../fairseq
 ```
+The results should look like:
 |       Method      | Source Mean | Target Mean | Source Frac. | Target Frac. |
 | ----------------- | ----------- | ----------- | ------------ | ------------ |
 | Gradient norms    |     0.40    |     0.44    |   **0.06**   |     0.06     |
@@ -391,16 +403,15 @@ cd ../fairseq
 | All attentions    |     0.58    |     0.80    |     0.08     |     0.12     |
 | Greedy            |   **0.12**  |   **0.12**  |     0.09     |   **0.02**   |
 
-Results for `checkpoint_best` of 410K steps:
-
 
 #### Download and preprocess alignments
-First, agree to the license download the gold alignments from [RWTH Aachen](https://www-i6.informatik.rwth-aachen.de/goldAlignment/). Put the files `en`, `de`, and `alignmentDeEn` in the directory `fairseq/examples/translation/iwslt14.tokenized.de-en/gold_labels`, and, in that same repo, convert to Unicode using
+The other translation experiment involves word alignments. It is described in more detail in Section 8.2 of the paper.
+
+First, agree to the license and download the gold alignments from [RWTH Aachen](https://www-i6.informatik.rwth-aachen.de/goldAlignment/). Put the files `en`, `de`, and `alignmentDeEn` in the directory `fairseq/examples/translation/iwslt14.tokenized.de-en/gold_labels`, and, in that same repo, convert to Unicode using
 ```{bash}
 iconv -f ISO_8859-1 -t UTF8 de > gold.de
 iconv -f ISO_8859-1 -t UTF8 en > gold.en
 ```
-
 Clean and tokenize the text
 ```{bash}
 cd ../..
@@ -414,15 +425,14 @@ cd ../..
 ```
 
 Apply BPE
-
 ```{bash}
 python subword-nmt/subword_nmt/apply_bpe.py -c iwslt14.tokenized.de-en/code < iwslt14.tokenized.de-en/gold_labels/tmp_gold.en > iwslt14.tokenized.de-en/gold_labels/gold_bpe.en 
 python subword-nmt/subword_nmt/apply_bpe.py -c iwslt14.tokenized.de-en/code < iwslt14.tokenized.de-en/gold_labels/tmp_gold.de > iwslt14.tokenized.de-en/gold_labels/gold_bpe.de
 ```
 
-Since the original file automatically tokenizes the apostrophes (e.g. `don ' t`) after BPE, sometimes there are incorrect spaces in the tokenization (e.g. `don &apos; t` instead of `don &apos;t`). Since this would change the alignments for these files, you may need to go through the files `gold_bpe.en` and `gold_bpe.de` and change them manually. Keep the spaces for apostrophes but not for plurals, e.g. `man &apos;s office` and `&apos; legal drugs &apos; (` are both correct. Delete the new lines at the bottom of `gold.en`, `gold.de`, `gold_bpe.en`, and `gold_bpe.de`. The only other necessary change is changing `à@@ -@@` to `a-@@` on line 247 since we don't tokenize accents.
+Since the original file automatically tokenizes the apostrophes (e.g. `don ' t`) after BPE, sometimes there are incorrect spaces in the tokenization (e.g. `don &apos; t` instead of `don &apos;t`). Since this would change the alignments for these files, you may need to go through the files `gold_bpe.en` and `gold_bpe.de` and change them manually. Keep the spaces for apostrophes but not for plurals, e.g. `man &apos;s office` and `&apos; legal drugs &apos;` are both correct. Delete the new lines at the bottom of `gold.en`, `gold.de`, `gold_bpe.en`, and `gold_bpe.de`. The only other necessary change is changing `à@@ -@@` to `a-@@` on line 247 since we don't tokenize accents.
 
-If you would like to skip these steps, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you the preprocessed files.
+If you've agreed to the license and would like to skip these steps, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you the preprocessed files.
 
 #### Binarize gold alignments
 ```{bash}
@@ -436,8 +446,9 @@ fairseq-preprocess --source-lang de --target-lang en \
 ```
 
 #### Create mapping between alignments with/without BPE
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
+CHECKPOINT_DIR=...
 cd ../analysis
 python map_alignments_to_bpe.py --checkpoint_dir $CHECKPOINT_DIR
 cd ../fairseq
@@ -474,9 +485,9 @@ python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task alignments  --method all_attention  --top_1
 ```
-Repeat the above two steps with the `--top_1` flag, and also for each baseline.
 
 #### Evaluate alignments
+These commands will reproduce Table 4 in the paper.
 ```{bash}
 cd ../analysis
 python evaluate_alignment_rationales.py --baseline gradient_norm 
@@ -491,7 +502,7 @@ python evaluate_alignment_rationales.py --baseline all_attention
 python evaluate_alignment_rationales.py --baseline all_attention  --top_1
 cd ../fairseq
 ```
-And repeat with each baseline.
+The results should look like:
 
 |       Method       | Length |  AER   |  IOU   |   F1   |  Top1  |
 | ------------------ | ------ | ------ | ------ | ------ | ------ |
@@ -503,7 +514,8 @@ And repeat with each baseline.
 | Greedy             | **4.9**|**0.78**|**0.40**|**0.24**|  0.64  |
 
 
-#### Plot greedy rationalization example from Fairseq
+#### Plot greedy rationalization example
+This will reproduce Figure 6 from the paper.
 ```{bash}
 python plot_iwslt_rationalization.py
 cd ..
@@ -511,7 +523,7 @@ cd ..
 
 ### <a id="gpt2">GPT-2</a>
 
-In the paper, we performed experiments for fine-tuning GPT-2 Large (using sequence lengths of 1024). Since practitioners may not have a GPU that has the memory capacity to train the large model, our replication instructions are for GPT-2 Medium, fine-tuning with a sequence length of 512. This can be done on a single 12GB GPU, and the rationalization performance is similar for both models. If you would like to specifically replicate our results for GPT-2 Large, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you the fine-tuning instructions/the full fine-tuned model.
+In the paper, we performed experiments for fine-tuning GPT-2 Large (using sequence lengths of 1024). Since practitioners may not have a GPU that has the memory capacity to train the large model, our replication instructions are for GPT-2 Medium, fine-tuning with a sequence length of 512. This can be done on a single 12GB GPU, and the rationalization performance is similar for both models. If you would like to specifically replicate our results for GPT-2 Large, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you with the fine-tuning instructions/the full fine-tuned model.
 
 #### Download Open-Webtext
 
@@ -520,10 +532,10 @@ First go to the [OpenWebTextCorpus](https://skylion007.github.io/OpenWebTextCorp
 Alternatively, you can email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can send you the raw files (they're a little too large to store on Github).
 
 #### Fine-tune GPT-2 for compatibility using word dropout
-Note about Apex....
+Make sure to replace `CHECKPOINT_DIR` with the directory you're using to store model checkpoints.
 ```{bash}
 cd huggingface
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
+CHECKPOINT_DIR=...
 python examples/pytorch/language-modeling/run_clm.py \
     --model_name_or_path gpt2-medium \
     --do_train \
@@ -570,6 +582,7 @@ python examples/pytorch/language-modeling/run_clm.py \
 This should give a heldout perplexity of 19.9674.
 
 #### Plot "the" repeats to check compatibility
+This will reproduce Figure 4 of the paper.
 ```{bash}
 cd ../analysis
 python plot_gpt2_the_repeats.py  --checkpoint_dir $CHECKPOINT_DIR
@@ -577,17 +590,19 @@ cd ../huggingface
 ```
 
 #### Plot page 1 figure
+This will reproduce Figure 1 of the paper. Alternatively, you can use our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw) to reproduce Figure 1.
 ```{bash}
 python plot_gpt2_rationalization.py  --checkpoint_dir $CHECKPOINT_DIR
 ```
 
 #### Greedy rationalize analogies
+For the analogies experiment, we use the [analogies dataset](https://aclweb.org/aclwiki/Google_analogy_test_set_(State_of_the_art)) provided by [Mikolev et al](https://arxiv.org/abs/1301.3781). The dataset is already included in our Github, so there is no need to download anything else.
 ```{bash}
 python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method greedy 
 ```
 
-#### Greedy rationalize baselines and exhaustive
+#### Greedy rationalize baselines (along with exhaustive search)
 ```{bash}
 python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method gradient_norm
@@ -601,6 +616,8 @@ python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method all_attention
 python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method last_attention
+python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
+    --method exhaustive
 ```
 
 #### Evaluate rationales for analogies experiment
@@ -614,6 +631,7 @@ python evaluate_analogies_rationales.py --baseline last_attention
 python evaluate_analogies_rationales.py --baseline all_attention
 cd ../huggingface
 ```
+This should produce the following results:
 
 |       Method       | Length | Ratio |  Ante  |  No D  |
 | ------------------ | ------ | ----- | ------ | ------ |
@@ -625,7 +643,7 @@ cd ../huggingface
 | All attentions     |  11.2  |  2.3  |  0.99  |  0.32  |
 | Greedy             | **7.8**|**1.1**|**1.00**|**0.63**|
 
-
+Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 1 of the paper are a little different.
 
 #### Get wall-clock time comparisons
 ```{bash}
@@ -633,6 +651,7 @@ python compare_rationalization_times.py  --checkpoint_dir $CHECKPOINT_DIR
 ```
 
 #### Greedily rationalize Lambada
+For the final experiment, we collected an annotated version of the Lambada dataset. See more details about using the dataset [above](#annotated_lambada).
 ```{bash}
 python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
     --method greedy 
@@ -665,6 +684,7 @@ python evaluate_lambada_rationales.py --baseline last_attention
 python evaluate_lambada_rationales.py --baseline all_attention
 cd ../huggingface
 ```
+This should produce the following results:
 
 |       Method       | Length |  IOU   |   F1   |
 | ------------------ | ------ | ------ | ------ |
@@ -676,3 +696,4 @@ cd ../huggingface
 | All attentions     |  51.3  |  0.19  |  0.26  | 
 | Greedy             |**18.9**|**0.25**|**0.34**| 
 
+Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 1 of the paper are a little different.
