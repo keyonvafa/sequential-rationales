@@ -26,7 +26,7 @@ print([text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
 
 ## Sequential rationalization code
 
-To rationalize your own sequence model, check out the instructions in the [Custom dataset](#custom_dataset) section. To reproduce the experiments in our paper, jump ahead to [Reproduce experiments](#reproduce_experiments).
+To rationalize your own sequence model, check out the instructions in the [Custom model](#custom_model) section. To reproduce the experiments in our paper, jump ahead to [Reproduce experiments](#reproduce_experiments).
 
 First, make sure all the required packages are installed:
 
@@ -63,13 +63,36 @@ pip install -v --no-cache-dir \
 cd ../..
 ```
 
-## <a id="custom_dataset">Custom dataset</a>
+## <a id="custom_model">Custom model</a>
 
 Follow the instructions below if you'd like to rationalize your own model. Jump ahead if you'd like to rationalize [GPT-2](#gpt2) or a [transformer-based machine translation model](#iwslt).
 
+There are two steps: fine-tuning a model for compatibility, and then performing greedy rationalization. We currently support fine-tuning language models and conditional models in fairseq and fine-tuning GPT-2-based models in Hugging Face. ***Below, we'll walk through fine-tuning and rationalizing a language model using fairseq***, but see [IWSLT](#iwslt) for a conditional model example in fairseq or [GPT-2](#gpt2) for fine-tuning GPT-2 in fairseq.
+
 ### Fine-tune for compatibility
 
-TO DO
+First, you'll need to fine-tune your model for compatibility. Unless your model is trained with word-dropout, it is unable to form sensible predictions for incomplete inputs. For example, a pretrained language model may be able to fill in a blank when the sequence has no missing words, like `I ate some ice cream because I was ____________`, but it's not able to fill in the blank when other words in the sequence are missing, like `I XXX some XXX cream because XXX was ____________`. Since rationalization requires evaluating incomplete sequences, it's necessary to fine-tune for compatibility by using word dropout.
+
+Make sure the model architecture is registered in [`fairseq/fairseq/models/transformer_lm.py`](https://github.com/keyonvafa/sequential-rationales/blob/main/fairseq/fairseq/models/transformer_lm.py#L567). We'll use the name `transformer_lm_custom`. Also make sure the data is preprocessed under `fairseq/data-bin/custom` (check out [Majority Class preprocessing](#preprocess_majority_class) for an example).
+
+Fine-tune for compatibility using the command below. If you're fine-tuning a pretrained model for compatibility, define `CHECKPOINT_DIR` to be the directory containing the pretrained checkpoint (under `checkpoint_last.pt`). If you're training a model from scratch rather than fine-tuning, you may want to use a learning rate scheduler and warm up the learning rate.  
+```{bash}
+CHECKPOINT_DIR=...
+cd fairseq
+fairseq-train --task language_modeling \
+    data-bin/custom \
+    --arch transformer_lm_custom \
+    --optimizer adam --adam-betas '(0.9, 0.98)' \
+    --weight-decay 0.01 --clip-norm 0.0 \
+    --lr 1e-5 --reset-optimizer --reset-dataloader \
+    --tokens-per-sample 512 --sample-break-mode eos \
+    --max-tokens 2048 --update-freq 1 \
+    --no-epoch-checkpoints --fp16 \
+    --save-dir $CHECKPOINT_DIR/standard_majority_class \
+    --tensorboard-logdir logs/standard_majority_class \
+    --word-dropout-mixture 0.5 --word-dropout-type uniform_length
+```
+The `max-tokens` option depends on the size of your model and the capacity of your GPU. We recommend setting it to the maximum number that doesn't result in any memory errors. 
 
 ### Rationalize
 
@@ -81,7 +104,7 @@ All of the commands for reproducing experiments assume a single GPU.
 
 ## Majority Class
 
-### Preprocess
+### <a id="preprocess_majority_class">Preprocess</a>
 ```{bash}
 cd fairseq
 TEXT=examples/language_model/majority_class
