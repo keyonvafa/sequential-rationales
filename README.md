@@ -1,7 +1,7 @@
 # Rationales for Sequential Predictions
 
 ## Quick start
-Use our [colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw) to generate a sequence with GPT-2 and perform greedy rationalization.
+Use our [colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw) to generate a sequence with GPT-2 and perform greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
 <p align="center">
 <img src="https://github.com/keyonvafa/sequential-rationales/blob/main/analysis/figs/sequential_rationalization.gif" width="300" height="300" />
