@@ -7,6 +7,22 @@ Use our [colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQ
 <img src="https://github.com/keyonvafa/sequential-rationales/blob/main/analysis/figs/sequential_rationalization.gif" width="300" height="300" />
 </p>
 
+## Anotated Lambada
+`annotated_lambada.json` is an annotated dataset based on [Lambada](https://arxiv.org/abs/1606.06031), containing 107 passages and their annotated rationales.  Each row has three keys: 
+- `lambadaIndex` contains the corresponding (0-indexed) entry in Lambada.
+- `text` contains the text of the full passage.
+- `rationale`  contains the human rationales for predicting the final word of the passage. `rationale` is a list: each entry is a tuple of indices. The first index in each tuple represents the start of an annotation. The second index in each tuple represents the end of the corresponding annotation. The length of the list for each example is the size of its rationale.
+
+To load the dataset with Pandas, run:
+```python
+import pandas as pd
+
+df = pd.read_json('annotated_lambada.json', orient='records', lines=True)
+# Print the rationale of the first example
+text = df['text'].iloc[0]
+rationale = df['rationale'].iloc[0]
+print(text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
+```
 
 ## Requirements and Installation
 Configure a virtual environment using Python 3.6+ ([instructions here](https://docs.python.org/3.6/tutorial/venv.html)).
