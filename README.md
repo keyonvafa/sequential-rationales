@@ -7,6 +7,27 @@ Check out our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDO
 <img src="https://github.com/keyonvafa/sequential-rationales/blob/main/analysis/figs/sequential_rationale_small.gif" --width="300" height="300" />
 </p>
 
+The following code loads our compatible GPT-2 and rationalizes a sampled sequence:
+
+```python
+from huggingface.rationalization import rationalize_lm
+from transformers import AutoTokenizer, AutoModelWithLMHead
+
+# Load model from Hugging Face
+model = AutoModelWithLMHead.from_pretrained("keyonvafa/compatible-gpt2")
+tokenizer = AutoTokenizer.from_pretrained("keyonvafa/compatible-gpt2")
+model.cuda()
+model.eval()
+
+# Generate sequence
+input_string = "The Supreme Court on Tuesday"
+input_ids = tokenizer(input_string, return_tensors='pt')['input_ids'].to(model.device)
+generated_input = model.generate(input_ids=input_ids, max_length=16, do_sample=False)[0]
+  
+# Rationalize sequence with greedy rationalization
+rationales, rationalization_log = rationalize_lm(model, generated_input, tokenizer, verbose=True)
+```
+
 ## Annotated Lambada
 `annotated_lambada.json` is an annotated dataset based on [Lambada](https://arxiv.org/abs/1606.06031), containing 107 passages and their annotated rationales.  Each row has three keys: 
 - `lambadaIndex` contains the corresponding (0-indexed) entry in Lambada.
@@ -88,11 +109,19 @@ fairseq-train --task language_modeling \
     --tokens-per-sample 512 --sample-break-mode eos \
     --max-tokens 2048 --update-freq 1 \
     --no-epoch-checkpoints --fp16 \
-    --save-dir $CHECKPOINT_DIR/standard_majority_class \
-    --tensorboard-logdir logs/standard_majority_class \
+    --save-dir $CHECKPOINT_DIR/custom \
+    --tensorboard-logdir logs/custom \
     --word-dropout-mixture 0.5 --word-dropout-type uniform_length
 ```
-The `max-tokens` option depends on the size of your model and the capacity of your GPU. We recommend setting it to the maximum number that doesn't result in any memory errors. 
+The command above uses word dropout with probability 0.5. Each time word dropout is being performed, the number of words dropped out is uniformly sampled from 1 to the sequence length. The corresponding number of tokens are dropped out uniformly at random. For machine translation, we recommend setting `--word-dropout-type inverse_length`.
+
+The `max-tokens` option depends on the size of your model and the capacity of your GPU. We recommend setting it to the maximum number that doesn't result in memory errors. 
+
+The number of training iterations depends on the dataset and model. We recommend following the training progress using [TensorBoard](https://pytorch.org/docs/stable/tensorboard.html):
+
+```bash
+tensorboard --logdir=logs --port=6006
+```
 
 ### Rationalize
 
