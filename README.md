@@ -24,7 +24,13 @@ rationale = df['rationale'].iloc[0]
 print([text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
 ```
 
-## Requirements and Installation
+## Sequential rationalization code
+
+To rationalize your own sequence model, check out the instructions in the [Custom dataset](#custom_dataset) section. To reproduce the experiments in our paper, jump ahead to [Reproduce experiments](#reproduce_experiments).
+
+First, make sure all the required packages are installed:
+
+### Requirements and installation
 Configure a virtual environment using Python 3.6+ ([instructions here](https://docs.python.org/3.6/tutorial/venv.html)).
 Inside the virtual environment, use `pip` to install the required packages:
 
@@ -56,17 +62,20 @@ pip install -v --no-cache-dir \
   --global-option="--fast_multihead_attn" ./
 cd ../..
 ```
-All of the training commands assume a single GPU.
 
-## Custom Datset
+## <a id="custom_dataset">Custom dataset</a>
 
-### Fine-tuning
+### Fine-tune for compatibility
+
+TO DO
+
+### Rationalize
 
 TO DO
 
-### Rationalization
+## <a id="reproduce_experiments">Reproduce experiments</a>
 
-TO DO
+All of the commands for reproducing experiments assume a single GPU.
 
 ## Majority Class
 
