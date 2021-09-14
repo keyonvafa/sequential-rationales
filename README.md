@@ -282,7 +282,6 @@ fairseq-train \
 #### Copy standard transformer to new compatible folder
 When we're done pretraining the standard model, we can fine-tune for compatibility using word dropout. We first setup the checkpoint for the compatible model.
 ```bash
-CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 mkdir $CHECKPOINT_DIR/compatible_iwslt
 cp $CHECKPOINT_DIR/standard_iwslt/checkpoint_best.pt $CHECKPOINT_DIR/compatible_iwslt/checkpoint_last.pt
 ```
