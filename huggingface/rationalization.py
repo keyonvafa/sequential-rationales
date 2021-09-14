@@ -353,9 +353,9 @@ def rationalize_lm(model,
   Here, `S` refers to the set of all possible rationales (i.e. the power set
   containing all sequence token subsets), and `s` is an index set that 
   indicates sequence subsets that are considered as rationales. In other words, 
-  the objective is to find the subset of input tokens such that the conditional
-  probability of the `t`-th target token is maximized by the true `t`-th
-  target.
+  the objective is to find the smallest subset of input tokens such that the 
+  conditional probability of the `t`-th target token is maximized by the true 
+  `t`-th target.
 
   This function maximizes this objective greedily. It begins with an empty 
   index set, and at each step adds the missing token that most maximizes the

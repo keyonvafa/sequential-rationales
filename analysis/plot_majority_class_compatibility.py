@@ -40,9 +40,9 @@ for model_name in model_names:
     os.path.join(args.checkpoint_dir, model_name),
     checkpoint_file='checkpoint_best.pt',
     data_name_or_path=majority_class_data_dir)
-  model.half()
   if torch.cuda.is_available():
     model.cuda()
+    model.half()
   model.eval()
   model.model = model.models[0]
   

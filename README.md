@@ -124,8 +124,33 @@ tensorboard --logdir=logs --port=6006
 ```
 
 ### Rationalize
+From the Fairseq directory,
+```python
+import os
+from fairseq.models.transformer import TransformerModel
+from rationalization import rationalize_lm
 
-TO DO
+# Define `checkpoint_dir` to be the directory containing the fine-tuned 
+# model checkpoint.
+checkpoint_dir = ...
+
+# Load the model.
+model = TransformerModel.from_pretrained(
+    os.path.join(checkpoint_dir, "compatible_majority_class"),
+    checkpoint_file="checkpoint_best.pt",
+    data_name_or_path="data-bin/majority_class")
+model.cuda()
+model.eval()
+model.model = model.models[0]
+
+# Give the model a prefix for generation.
+input_string = "The Supreme Court on Tuesday"
+input_ids = model.task.dictionary.encode_line(input_string)
+generated_sequence = model.generate(input_ids)[0]['tokens']
+# NOTE: Depending on how Fairseq preprocessed the data, you may want to add the
+# <eos> token to the beginning of `generated_sequence`.
+rationales,  = rationalize_lm(model, generated_sequence, verbose=True)
+```
 
 ## <a id="reproduce_experiments">Reproduce experiments</a>
 
