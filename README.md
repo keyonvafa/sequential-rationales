@@ -65,6 +65,8 @@ cd ../..
 
 ## <a id="custom_dataset">Custom dataset</a>
 
+Follow the instructions below if you'd like to rationalize your own model. Jump ahead if you'd like to rationalize [GPT-2](#gpt2) or a [transformer-based machine translation model](#iwslt).
+
 ### Fine-tune for compatibility
 
 TO DO
@@ -151,7 +153,7 @@ python plot_majority_class_compatibility.py --checkpoint_dir $CHECKPOINT_DIR
 cd ../fairseq
 ```
 
-## IWSLT
+## <a id="iwslt">IWSLT</a>
 
 ### Download and preprocess the data
 ```{bash}
@@ -430,7 +432,7 @@ python plot_iwslt_rationalization.py
 cd ..
 ```
 
-## GPT-2
+## <a id="gpt2">GPT-2</a>
 
 In the paper, we performed experiments for fine-tuning GPT-2 Large (using sequence lengths of 1024). Since practitioners may not have a GPU that has the memory capacity to train the large model, our replication instructions are for GPT-2 Medium, fine-tuning with a sequence length of 512. This can be done on a single 12GB GPU, and the rationalization performance is similar for both models. If you would like to specifically replicate our results for GPT-2 Large, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you the fine-tuning instructions/the full fine-tuned model.
 
