@@ -7,7 +7,7 @@ Use our [colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQ
 <img src="https://github.com/keyonvafa/sequential-rationales/blob/main/analysis/figs/sequential_rationalization.gif" width="300" height="300" />
 </p>
 
-## Anotated Lambada
+## Annotated Lambada
 `annotated_lambada.json` is an annotated dataset based on [Lambada](https://arxiv.org/abs/1606.06031), containing 107 passages and their annotated rationales.  Each row has three keys: 
 - `lambadaIndex` contains the corresponding (0-indexed) entry in Lambada.
 - `text` contains the text of the full passage.
