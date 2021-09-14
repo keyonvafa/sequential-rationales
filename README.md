@@ -1,6 +1,6 @@
 # Rationales for Sequential Predictions
 
-## Quick start
+## Quick Start
 Check out our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
 <p align="center">
@@ -45,9 +45,9 @@ rationale = df['rationale'].iloc[0]
 print([text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
 ```
 
-## Sequential rationalization code
+## Sequential Rationalization Code
 
-To rationalize your own sequence model, check out the instructions in the [Custom model](#custom_model) section. To reproduce the experiments in our paper, jump ahead to [Reproduce experiments](#reproduce_experiments).
+To rationalize your own sequence model, check out the instructions in the [Custom Model](#custom_model) section. To reproduce the experiments in our paper, jump ahead to [Reproduce Experiments](#reproduce_experiments).
 
 First, make sure all the required packages are installed:
 
@@ -84,7 +84,7 @@ pip install -v --no-cache-dir \
 cd ../..
 ```
 
-## <a id="custom_model">Custom model</a>
+## <a id="custom_model">Custom Model</a>
 
 Follow the instructions below if you'd like to rationalize your own model. Jump ahead if you'd like to rationalize [GPT-2](#gpt2) or a [transformer-based machine translation model](#iwslt).
 
@@ -124,7 +124,7 @@ tensorboard --logdir=logs --port=6006
 ```
 
 ### Rationalize
-From the Fairseq directory,
+Once you've fine-tuned your model for compatibility, you can perform greedy rationalization. The following code snippet provides a template for sampling from the fine-tuned model and performing greedy rationalization. You can execute this code from the `fairseq` directory.
 ```python
 import os
 from fairseq.models.transformer import TransformerModel
@@ -152,13 +152,13 @@ generated_sequence = model.generate(input_ids)[0]['tokens']
 rationales,  = rationalize_lm(model, generated_sequence, verbose=True)
 ```
 
-## <a id="reproduce_experiments">Reproduce experiments</a>
+## <a id="reproduce_experiments">Reproduce Experiments</a>
 
-All of the commands for reproducing experiments assume a single GPU.
+The rest of this README provides instructions for reproducing all of the experiments from our paper. All of the commands below were run on a single GPU.
 
-## Majority Class
+### Majority Class
 
-### <a id="preprocess_majority_class">Preprocess</a>
+#### <a id="preprocess_majority_class">Preprocess</a>
 ```{bash}
 cd fairseq
 TEXT=examples/language_model/majority_class
@@ -170,7 +170,7 @@ fairseq-preprocess \
     --destdir data-bin/majority_class \
     --workers 20
 ```
-### Train standard model and evaluate heldout perplexity
+#### Train standard model and evaluate heldout perplexity
 ```{bash}
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 fairseq-train --task language_modeling \
@@ -196,7 +196,7 @@ fairseq-eval-lm data-bin/majority_class \
 ```
 This should report 1.80 as the test set perplexity.
 
-### Train compatible model
+#### Train compatible model
 ```{bash}
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 fairseq-train --task language_modeling \
@@ -223,16 +223,16 @@ fairseq-eval-lm data-bin/majority_class \
 ```
 This should also report 1.80 as the test set perplexity.
 
-### Plot compatibility
+#### Plot compatibility
 ```{bash}
 cd ../analysis
 python plot_majority_class_compatibility.py --checkpoint_dir $CHECKPOINT_DIR
 cd ../fairseq
 ```
 
-## <a id="iwslt">IWSLT</a>
+### <a id="iwslt">IWSLT</a>
 
-### Download and preprocess the data
+#### Download and preprocess the data
 ```{bash}
 cd examples/translation/
 bash prepare-iwslt14.sh
@@ -246,7 +246,7 @@ fairseq-preprocess --source-lang de --target-lang en \
     --workers 20
 ```
 
-### Train standard transformer model
+#### Train standard transformer model
 ```{bash}
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 fairseq-train \
@@ -272,14 +272,14 @@ fairseq-train \
     --fp16 --word-dropout-mixture 0. 
 ```
 
-### Copy standard transformer to new compatible folder
+#### Copy standard transformer to new compatible folder
 ```bash
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 mkdir $CHECKPOINT_DIR/compatible_iwslt
 cp $CHECKPOINT_DIR/standard_iwslt/checkpoint_best.pt $CHECKPOINT_DIR/compatible_iwslt/checkpoint_last.pt
 ```
 
-### Train compatible transformer model
+#### Train compatible transformer model
 ```{bash}
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 fairseq-train \
@@ -306,7 +306,7 @@ fairseq-train \
     --no-epoch-checkpoints
 ```
 
-### Evaluate BLEU
+#### Evaluate BLEU
 Standard:
 ```{bash}
 fairseq-generate data-bin/iwslt14.tokenized.de-en \
@@ -323,7 +323,7 @@ fairseq-generate data-bin/iwslt14.tokenized.de-en \
 ```
 This should report ~34.78.
 
-### Generate translations for distractor experiment
+#### Generate translations for distractor experiment
 ```{bash}
 mkdir generated_translations
 fairseq-generate data-bin/iwslt14.tokenized.de-en \
@@ -336,7 +336,7 @@ grep 'H-' \
   cut -f3 > generated_translations/compatible_iwslt.txt
 ```
 
-### Randomly concatenate generated sentences and binarize
+#### Randomly concatenate generated sentences and binarize
 ```{bash}
 cd ../analysis
 python create_distractor_iwslt_dataset.py
@@ -350,13 +350,13 @@ fairseq-preprocess --source-lang de --target-lang en \
     --workers 20
 ```
 
-### Perform greedy rationalization for distractor dataset
+#### Perform greedy rationalization for distractor dataset
 ```{bash}
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task distractors  --method greedy
 ```
 
-### Perform baseline rationalization for distractor dataset
+#### Perform baseline rationalization for distractor dataset
 ```{bash}
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task distractors  --method gradient_norm
@@ -371,7 +371,7 @@ python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
 ```
 And repeat for method in gradient_norm, signed_gradient, integrated_gradient, last_attention, all_attention
 
-### Evaluate distractors
+#### Evaluate distractors
 ```{bash}
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 cd ../analysis
@@ -394,7 +394,7 @@ cd ../fairseq
 Results for `checkpoint_best` of 410K steps:
 
 
-### Download and preprocess alignments
+#### Download and preprocess alignments
 First, agree to the license download the gold alignments from [RWTH Aachen](https://www-i6.informatik.rwth-aachen.de/goldAlignment/). Put the files `en`, `de`, and `alignmentDeEn` in the directory `fairseq/examples/translation/iwslt14.tokenized.de-en/gold_labels`, and, in that same repo, convert to Unicode using
 ```{bash}
 iconv -f ISO_8859-1 -t UTF8 de > gold.de
@@ -424,7 +424,7 @@ Since the original file automatically tokenizes the apostrophes (e.g. `don ' t`)
 
 If you would like to skip these steps, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you the preprocessed files.
 
-### Binarize gold alignments
+#### Binarize gold alignments
 ```{bash}
 TEXT=examples/translation/iwslt14.tokenized.de-en
 fairseq-preprocess --source-lang de --target-lang en \
@@ -435,7 +435,7 @@ fairseq-preprocess --source-lang de --target-lang en \
     --workers 20
 ```
 
-### Create mapping between alignments with/without BPE
+#### Create mapping between alignments with/without BPE
 ```{bash}
 CHECKPOINT_DIR=/statlerdrive/keyonvafa/sequential-rationale-checkpoints
 cd ../analysis
@@ -443,7 +443,7 @@ python map_alignments_to_bpe.py --checkpoint_dir $CHECKPOINT_DIR
 cd ../fairseq
 ```
 
-### Perform greedy rationalization for alignments dataset
+#### Perform greedy rationalization for alignments dataset
 ```{bash}
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task alignments  --method greedy
@@ -451,7 +451,7 @@ python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task alignments  --method greedy  --top_1
 ```
 
-### Perform baseline rationalization for alignments dataset
+#### Perform baseline rationalization for alignments dataset
 ```{bash}
 python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
     --task alignments  --method gradient_norm
@@ -476,7 +476,7 @@ python rationalize_iwslt.py --checkpoint_dir $CHECKPOINT_DIR \
 ```
 Repeat the above two steps with the `--top_1` flag, and also for each baseline.
 
-### Evaluate alignments
+#### Evaluate alignments
 ```{bash}
 cd ../analysis
 python evaluate_alignment_rationales.py --baseline gradient_norm 
@@ -503,23 +503,23 @@ And repeat with each baseline.
 | Greedy             | **4.9**|**0.78**|**0.40**|**0.24**|  0.64  |
 
 
-### Plot greedy rationalization example from Fairseq
+#### Plot greedy rationalization example from Fairseq
 ```{bash}
 python plot_iwslt_rationalization.py
 cd ..
 ```
 
-## <a id="gpt2">GPT-2</a>
+### <a id="gpt2">GPT-2</a>
 
 In the paper, we performed experiments for fine-tuning GPT-2 Large (using sequence lengths of 1024). Since practitioners may not have a GPU that has the memory capacity to train the large model, our replication instructions are for GPT-2 Medium, fine-tuning with a sequence length of 512. This can be done on a single 12GB GPU, and the rationalization performance is similar for both models. If you would like to specifically replicate our results for GPT-2 Large, email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can provide you the fine-tuning instructions/the full fine-tuned model.
 
-### Download Open-Webtext
+#### Download Open-Webtext
 
 First go to the [OpenWebTextCorpus](https://skylion007.github.io/OpenWebTextCorpus/), a WebText replication corpus provided by Aaron Gokaslan and Vanya Cohen. We only use a single split to train (we used `urlsf_subset09.tar`). Expand all the items and merge the first 998, taking only the first 8 million lines. This will be the training set. We used half of the remaining files as the validation set, and the other half as the test set. Store the files as `webtext_train.txt`, `webtext_valid.txt`, and `webtext_test.txt` in `huggingface/data`.
 
 Alternatively, you can email me at [keyvafa@gmail.com](mailto:keyvafa@gmail.com) and I can send you the raw files (they're a little too large to store on Github).
 
-### Fine-tune GPT-2 for compatibility using word dropout
+#### Fine-tune GPT-2 for compatibility using word dropout
 Note about Apex....
 ```{bash}
 cd huggingface
@@ -544,7 +544,7 @@ python examples/pytorch/language-modeling/run_clm.py \
     --word_dropout_mixture 0.5
 ```
 
-### Get heldout perplexity
+#### Get heldout perplexity
 For the compatible model:
 ```{bash}
 python examples/pytorch/language-modeling/run_clm.py \
@@ -569,25 +569,25 @@ python examples/pytorch/language-modeling/run_clm.py \
 ```
 This should give a heldout perplexity of 19.9674.
 
-### Plot "the" repeats to check compatibility
+#### Plot "the" repeats to check compatibility
 ```{bash}
 cd ../analysis
 python plot_gpt2_the_repeats.py  --checkpoint_dir $CHECKPOINT_DIR
 cd ../huggingface
 ```
 
-### Plot page 1 figure
+#### Plot page 1 figure
 ```{bash}
 python plot_gpt2_rationalization.py  --checkpoint_dir $CHECKPOINT_DIR
 ```
 
-### Greedy rationalize analogies
+#### Greedy rationalize analogies
 ```{bash}
 python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method greedy 
 ```
 
-### Greedy rationalize baselines and exhaustive
+#### Greedy rationalize baselines and exhaustive
 ```{bash}
 python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method gradient_norm
@@ -603,7 +603,7 @@ python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
     --method last_attention
 ```
 
-### Evaluate rationales for analogies experiment
+#### Evaluate rationales for analogies experiment
 ```{bash}
 cd ../analysis
 python evaluate_analogies_rationales.py --baseline gradient_norm
@@ -627,18 +627,18 @@ cd ../huggingface
 
 
 
-### Get wall-clock time comparisons
+#### Get wall-clock time comparisons
 ```{bash}
 python compare_rationalization_times.py  --checkpoint_dir $CHECKPOINT_DIR
 ```
 
-### Greedily rationalize Lambada
+#### Greedily rationalize Lambada
 ```{bash}
 python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
     --method greedy 
 ```
 
-### Rationalize Lambada baselines
+#### Rationalize Lambada baselines
 ```{bash}
 python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
     --method gradient_norm
@@ -654,7 +654,7 @@ python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
     --method all_attention 
 ```
 
-### Evaluate rationales for Lambada
+#### Evaluate rationales for Lambada
 ```{bash}
 cd ../analysis
 python evaluate_lambada_rationales.py --baseline gradient_norm
