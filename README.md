@@ -695,4 +695,4 @@ This should produce the following results:
 | All attentions     |  51.3  |  0.19  |  0.26  | 
 | Greedy             |**18.9**|**0.25**|**0.34**| 
 
-Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 1 of the paper are a little different.
+Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 2 of the paper are a little different.
