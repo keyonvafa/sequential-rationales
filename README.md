@@ -32,7 +32,7 @@ Inside the virtual environment, use `pip` to install the required packages:
 pip install -r requirements.txt
 ```
 
-Configure [huggingface](https://github.com/huggingface/transformers) to be developed locally
+Configure [Hugging Face](https://github.com/huggingface/transformers) to be developed locally
 ```{bash}
 cd huggingface
 pip install --editable ./
