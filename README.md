@@ -21,7 +21,7 @@ df = pd.read_json('annotated_lambada.json', orient='records', lines=True)
 # Print the rationale of the first example
 text = df['text'].iloc[0]
 rationale = df['rationale'].iloc[0]
-print(text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
+print([text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
 ```
 
 ## Requirements and Installation
