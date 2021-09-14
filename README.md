@@ -417,7 +417,7 @@ And repeat with each baseline.
 
 ### Plot greedy rationalization example from Fairseq
 ```{bash}
-python plot_iwlt_rationalization.py
+python plot_iwslt_rationalization.py
 cd ..
 ```
 
