@@ -90,7 +90,7 @@ cd ../..
 
 Follow the instructions below if you'd like to rationalize your own model. Jump ahead if you'd like to rationalize [GPT-2](#gpt2) or a [transformer-based machine translation model](#iwslt).
 
-There are two steps: fine-tuning a model for compatibility, and then performing greedy rationalization. We currently support fine-tuning language models and conditional models in fairseq and fine-tuning GPT-2-based models in Hugging Face. ***Below, we'll walk through fine-tuning and rationalizing a language model using fairseq***, but see [IWSLT](#iwslt) for a conditional model example in fairseq or [GPT-2](#gpt2) for fine-tuning GPT-2 in fairseq.
+There are two steps: fine-tuning a model for compatibility, and then performing greedy rationalization. We currently support fine-tuning language models and conditional models in fairseq and fine-tuning GPT-2-based models in Hugging Face. ***Below, we'll walk through fine-tuning and rationalizing a language model using fairseq***, but see [IWSLT](#iwslt) for a conditional model example in fairseq or [GPT-2](#gpt2) for fine-tuning GPT-2 in Hugging Face.
 
 ### Fine-tune for compatibility
 
