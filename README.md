@@ -1,5 +1,7 @@
 # Rationales for Sequential Predictions
 
+Source code for the paper: [Rationales for Sequential Predictions by Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)](https://arxiv.org/abs/2109.06387).
+
 ## Quick Start
 Check out our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
@@ -47,7 +49,7 @@ print([text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
 
 ## Sequential Rationalization Code
 
-To rationalize your own sequence model, check out the instructions in the [Custom Model](#custom_model) section. To reproduce the experiments in our paper, jump ahead to [Reproduce Experiments](#reproduce_experiments).
+To rationalize your own sequence model, check out the instructions in the [Custom Model](#custom_model) section. To reproduce the experiments in our [paper](https://arxiv.org/abs/2109.06387), jump ahead to [Reproduce Experiments](#reproduce_experiments).
 
 First, make sure all the required packages are installed:
 
@@ -154,7 +156,7 @@ rationales,  = rationalize_lm(model, generated_sequence, verbose=True)
 
 ## <a id="reproduce_experiments">Reproduce Experiments</a>
 
-The rest of this README provides instructions for reproducing all of the experiments from our paper. All of the commands below were run on a single GPU.
+The rest of this README provides instructions for reproducing all of the experiments from our [paper](https://arxiv.org/abs/2109.06387). All of the commands below were run on a single GPU.
 
 ### Majority Class
 Majority Class is a synthetic language we simulated. We include the full dataset in [`fairseq/examples/language_model/majority_class`](https://github.com/keyonvafa/sequential-rationales/tree/main/fairseq/examples/language_model/majority_class).
