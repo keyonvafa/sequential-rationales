@@ -55,7 +55,6 @@ df = pd.read_json(os.path.join(project_dir, 'annotated_lambada.json'),
 # - lamabdaIndex: The index of the example from the original LAMBADA dataset.
 # - text: The text of the example (unchanged from the original dataset).
 # - rationale: The rationales for the final word of each passage.
-# df.to_json('test3.json', orient='records', lines=True)
 
 # Load model
 tokenizer = AutoTokenizer.from_pretrained('gpt2-medium')
