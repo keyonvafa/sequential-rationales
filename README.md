@@ -138,9 +138,9 @@ checkpoint_dir = ...
 
 # Load the model.
 model = TransformerModel.from_pretrained(
-    os.path.join(checkpoint_dir, "compatible_majority_class"),
+    os.path.join(checkpoint_dir, "custom"),
     checkpoint_file="checkpoint_best.pt",
-    data_name_or_path="data-bin/majority_class")
+    data_name_or_path="data-bin/custom")
 model.cuda()
 model.eval()
 model.model = model.models[0]
