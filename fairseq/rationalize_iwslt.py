@@ -88,53 +88,50 @@ indices_to_evaluate = np.sort(rs.choice(itr.total, 60, replace=False))
 
 first_time = time.time()
 for eval_index, sample in enumerate(itr):
-  # if eval_index in indices_to_evaluate:
-  # if eval_index in [59]:  # for plotting
-  if True:
-    print("Working on {}/{}...".format(eval_index, itr.total))
-    start_time = time.time()
-    # Move to cuda if available
-    if torch.cuda.is_available():
-      sample = utils.move_to_cuda(sample)
-    if sample['target'][0, 0].item() != model.task.source_dictionary.eos_index:
-      # Add <eos> token to beginning of target tokens.
-      sample['target'] = torch.cat([
-        torch.tensor([[model.task.target_dictionary.eos_index]]).to(
-          sample['target']), sample['target']], -1)
-    if args.method == 'greedy':
-      (source_rationales, target_rationales, 
-       rationalization_log) = rationalize_conditional_model(
-         model,
-         sample['net_input']['src_tokens'][0], 
-         sample['target'][0], 
-         verbose=args.verbose,
-         max_steps=args.max_steps,
-         top_1=args.top_1)
-    else:
-      (source_rationales, target_rationales, 
-       rationalization_log) = baseline_rationalize_conditional_model(
-         model,
-         sample['net_input']['src_tokens'][0], 
-         sample['target'][0],
-         args.method,
-         verbose=args.verbose,
-         max_steps=args.max_steps,
-         top_1=args.top_1)
+  print("Working on {}/{}...".format(eval_index, itr.total))
+  start_time = time.time()
+  # Move to cuda if available
+  if torch.cuda.is_available():
+    sample = utils.move_to_cuda(sample)
+  if sample['target'][0, 0].item() != model.task.source_dictionary.eos_index:
+    # Add <eos> token to beginning of target tokens.
+    sample['target'] = torch.cat([
+      torch.tensor([[model.task.target_dictionary.eos_index]]).to(
+        sample['target']), sample['target']], -1)
+  if args.method == 'greedy':
+    (source_rationales, target_rationales, 
+     rationalization_log) = rationalize_conditional_model(
+       model,
+       sample['net_input']['src_tokens'][0], 
+       sample['target'][0], 
+       verbose=args.verbose,
+       max_steps=args.max_steps,
+       top_1=args.top_1)
+  else:
+    (source_rationales, target_rationales, 
+     rationalization_log) = baseline_rationalize_conditional_model(
+       model,
+       sample['net_input']['src_tokens'][0], 
+       sample['target'][0],
+       args.method,
+       verbose=args.verbose,
+       max_steps=args.max_steps,
+       top_1=args.top_1)
 
-    # Save rationalization results
-    task_name = ("alignments_top_1" 
-                 if (args.top_1 and args.task == 'alignments') 
-                 else args.task)
-    results_dir = os.path.join(
-      fairseq_dir, 
-      "rationalization_results/{}/{}".format(task_name, args.method))
-    if not os.path.exists(results_dir):
-      os.makedirs(results_dir)
-    file_name = os.path.join(results_dir, "{}.json".format(
-      str(sample['id'].item())))
-    print("...writing to {}".format(file_name))
-    with open(file_name, 'w') as outfile:
-      json.dump(rationalization_log, outfile, default=convert)
+  # Save rationalization results
+  task_name = ("alignments_top_1" 
+               if (args.top_1 and args.task == 'alignments') 
+               else args.task)
+  results_dir = os.path.join(
+    fairseq_dir, 
+    "rationalization_results/{}/{}".format(task_name, args.method))
+  if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+  file_name = os.path.join(results_dir, "{}.json".format(
+    str(sample['id'].item())))
+  print("...writing to {}".format(file_name))
+  with open(file_name, 'w') as outfile:
+    json.dump(rationalization_log, outfile, default=convert)
     print("...finished in {:.2f} (average: {:.2f})".format(
       time.time() - start_time, (time.time() - first_time) / (eval_index + 1)))
 
