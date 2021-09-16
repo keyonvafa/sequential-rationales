@@ -151,7 +151,7 @@ input_ids = model.task.dictionary.encode_line(input_string)
 generated_sequence = model.generate(input_ids)[0]['tokens']
 # NOTE: Depending on how Fairseq preprocessed the data, you may want to add the
 # <eos> token to the beginning of `generated_sequence`.
-rationales,  = rationalize_lm(model, generated_sequence, verbose=True)
+rationales, log = rationalize_lm(model, generated_sequence, verbose=True)
 ```
 
 ## <a id="reproduce_experiments">Reproduce Experiments</a>
