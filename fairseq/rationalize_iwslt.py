@@ -90,9 +90,7 @@ first_time = time.time()
 for eval_index, sample in enumerate(itr):
   print("Working on {}/{}...".format(eval_index, itr.total))
   start_time = time.time()
-  # Move to cuda if available
-  if torch.cuda.is_available():
-    sample = utils.move_to_cuda(sample)
+  sample = utils.move_to_cuda(sample)
   if sample['target'][0, 0].item() != model.task.source_dictionary.eos_index:
     # Add <eos> token to beginning of target tokens.
     sample['target'] = torch.cat([
