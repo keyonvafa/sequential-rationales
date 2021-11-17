@@ -2,6 +2,8 @@
 
 Source code for the paper: [Rationales for Sequential Predictions by Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)](https://arxiv.org/abs/2109.06387).
 
+[Click here](https://youtu.be/4Nvy2AVkKVA) to watch our EMNLP talk. 
+
 ## Quick Start
 Check out our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
