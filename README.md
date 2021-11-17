@@ -700,3 +700,14 @@ This should produce the following results:
 | Greedy             |**18.9**|**0.25**|**0.34**| 
 
 Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 2 of the paper are a little different.
+
+## Bibtex Citation
+
+```
+@inproceedings{vafa2021rationales,
+  title={Rationales for Sequential Predictions},
+  author={Vafa, Keyon and Deng, Yuntian and Blei, David M and Rush, Alexander M},
+  booktitle={Empirical Methods in Natural Language Processing},
+  year={2021}
+}
+```
