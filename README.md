@@ -1,6 +1,6 @@
 # Rationales for Sequential Predictions
 
-Source code for the paper: [Rationales for Sequential Predictions by Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)](https://arxiv.org/abs/2109.06387).
+Source code for the paper: [Rationales for Sequential Predictions by Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)](https://aclanthology.org/2021.emnlp-main.807/).
 
 [Click here](https://youtu.be/4Nvy2AVkKVA) to watch our EMNLP talk. 
 
